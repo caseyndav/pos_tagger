@@ -10,7 +10,7 @@ from sys import stdout, stderr
 
 optparser = optparse.OptionParser()
 optparser.add_option("-i", "--input-data", dest="input_data", default="data/test", help="Input file to tag")
-optparser.add_option("-t", "--training-data", dest="training_data", default="data/training", help="Pre-tagged training data"
+optparser.add_option("-t", "--training-data", dest="training_data", default="data/training", help="Pre-tagged training data")
 (opts, _) = optparser.parse_args()
 
 input_file = open(opts.input_data)
