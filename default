@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+# File:         default
+# Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
+# Description:  Basic POS tagger.
+
+import optparse
+from collections import defaultdict
+from sys import stdout, stderr
+
+optparser = optparse.OptionParser()
+optparser.add_option("-i", "--input-data", dest="input_data", default="data/test", help="Input file to tag")
+optparser.add_option("-t", "--training-data", dest="training_data", default="data/training", help="Pre-tagged training data"
+(opts, _) = optparser.parse_args()
+
+input_file = open(opts.input_data)
+training_file = open(opts.training_data)
+tag_counts = defaultdict(lambda: defaultdict(int))
+
+def get_training_sentence():
+    yield training_file.readline()
+
+def get_input_sentence():
+    yield input_file.readline()
+
+sys.stderr.write("Collecting tags...")
+for sentence in get_training_sentence():
+    for word_tag_pair in sentence.split(" "):
+        (word, tag) = word_tag_pair.split("|||")
+        tag_counts[word][tag] += 1
+
+sys.stderr.write("Tagging...")
+for sentence in get_input_sentence():
+    tagged_sentence = ""
+    for word in sentence.split(" "):
+        best_tag = max(tag_counts[word].iterkeys(), key=(lambda key: tag_counts[word][key]))
+        tagged_sentence += word + "|||" + tag + " "
+    sys.stdout.write(tagged_sentence + "\n")
+
+input_file.close()
+training_file.close()
+sys.stderr.write("Done")
