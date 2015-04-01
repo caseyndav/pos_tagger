@@ -7,7 +7,6 @@
 import optparse
 import random
 import sys
-from collections import defaultdict
 
 optparser = optparse.OptionParser()
 optparser.add_option("-i", "--input-data", dest="input_data", default="data/test.f", help="Input file to tag")
