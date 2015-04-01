@@ -4,5 +4,34 @@
 # Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
 # Description:  Grading script for tagged output.
 
-## TO-DO ##
-pass
+import fileinput
+import optparse
+import sys
+
+optparser = optparse.OptionParser()
+optparser.add_option("-r", "--reference", dest="ref_file", default="data/refs_short.f", help="Reference POS tags")
+(opts, _) = optparser.parse_args()
+
+ref_file = open(opts.ref_file)
+input_file = sys.stdin
+
+ref_file_lines = ref_file.readlines()
+input_file_lines = input_file.readlines()
+
+correct_tags = []
+for i in xrange(len(ref_file_lines)):
+    ref_sent = ref_file_lines[i].strip().split()
+    input_sent = input_file_lines[i].strip().split()
+    for j in xrange(len(ref_sent)):
+        (_, ref_tag) = ref_sent[j].split(":::")
+        (_, input_tag) = input_sent[j].split(":::")
+        if ref_tag == input_tag:
+            correct_tags.append(1)
+        else:
+            correct_tags.append(0)
+
+percent_correct = float(sum(correct_tags)) / float(len(correct_tags))
+
+sys.stdout.write("Accuracy:\n%f\n" % percent_correct)
+
+ref_file.close()

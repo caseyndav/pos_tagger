@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+# File:         generate_stanford_refs
+# Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
+# Description:  Generates a POS tag references file for the test data using an
+#               off-the-shelf Stanford tagger. Maps French tags to
+#               the universal set.
+
+import optparse
+import sys
+from nltk.tag.stanford import POSTagger
+
+PATH_TO_MODEL = "../stanford_postagger/models/french.tagger"
+PATH_TO_JAR = "../stanford_postagger/stanford-postagger.jar"
+
+optparser = optparse.OptionParser()
+optparser.add_option("-i", "--input-data", dest="input_data", default="data/test.f", help="Test data file to generate refs for")
+optparser.add_option("-m", "--mapping", dest="map_file", default="data/fr-paris.map", help="Line-by-line fr-univ tag mappings")
+(opts, _) = optparser.parse_args()
+
+input_file = open(opts.input_data)
+map_file = open(opts.map_file)
+
+mapping = {}
+for line in map_file.readlines():
+    (fr_tag, univ_tag) = line.strip().split("\t")
+    mapping[fr_tag] = univ_tag
+
+def map_tags(french_tags):
+    univ_tags = []
+    for (word, tag) in french_tags:
+        try:
+            univ_tag = mapping[tag]
+        except KeyError:
+            univ_tag = "X"
+        univ_tags.append((word, univ_tag))
+    return univ_tags
+
+sys.stderr.write("Tagging with Stanford Tagger...\n")
+tagger = POSTagger(PATH_TO_MODEL, PATH_TO_JAR)
+for sentence in input_file.readlines():
+    sentence = sentence.strip()
+    french_tags = tagger.tag(sentence.split())[0] # de-nest the lists
+    univ_tags = map_tags(french_tags)
+    tagged_sentence = ""
+    for (word, tag) in univ_tags:
+        tagged_sentence += word + ":::" + tag + " "
+    tagged_sentence += "\n"
+    sys.stdout.write(tagged_sentence.encode("utf-8"))
+
+input_file.close()
+sys.stderr.write("Done\n")
