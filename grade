@@ -30,8 +30,8 @@ for i in xrange(len(ref_file_lines)):
         else:
             correct_tags.append(0)
 
-percent_correct = float(sum(correct_tags)) / float(len(correct_tags))
+accuracy = float(sum(correct_tags)) / float(len(correct_tags))
 
-sys.stdout.write("Accuracy:\n%f\n" % percent_correct)
+sys.stdout.write("Accuracy:\n%f\n" % accuracy)
 
 ref_file.close()
