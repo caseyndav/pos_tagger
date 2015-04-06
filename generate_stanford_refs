@@ -10,7 +10,7 @@ import optparse
 import sys
 from nltk.tag.stanford import POSTagger
 
-PATH_TO_MODEL = "../stanford_postagger/models/french.tagger"
+PATH_TO_MODEL = "../stanford_postagger/models/english-left3words-distsim.tagger"
 PATH_TO_JAR = "../stanford_postagger/stanford-postagger.jar"
 
 optparser = optparse.OptionParser()
