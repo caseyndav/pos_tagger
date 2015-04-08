@@ -3,7 +3,7 @@
 # File:         generate_stanford_refs
 # Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
 # Description:  Generates a POS tag references file for the test data using an
-#               off-the-shelf Stanford tagger. Maps French tags to
+#               off-the-shelf Stanford tagger. Maps language-specific tags to
 #               the universal set.
 
 import optparse
@@ -16,7 +16,7 @@ PATH_TO_JAR = "../stanford_postagger/stanford-postagger.jar"
 
 optparser = optparse.OptionParser()
 optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.e", help="Test data file to generate refs for")
-optparser.add_option("-m", "--mapping", dest="map_file", default="data/en-ptb.map", help="Line-by-line german-univ tag mappings")
+optparser.add_option("-m", "--mapping", dest="map_file", default="data/en-ptb.map", help="Language-specific to universal tag mappings")
 (opts, _) = optparser.parse_args()
 
 input_file = open(opts.input_data)
@@ -24,12 +24,12 @@ map_file = open(opts.map_file)
 
 mapping = {}
 for line in map_file.readlines():
-    (fr_tag, univ_tag) = line.strip().split("\t")
-    mapping[fr_tag] = univ_tag
+    (ls_tag, univ_tag) = line.strip().split("\t")
+    mapping[ls_tag] = univ_tag
 
-def map_tags(french_tags):
+def map_tags(language_specific_tags):
     univ_tags = []
-    for (word, tag) in french_tags:
+    for (word, tag) in language_specific_tags:
         try:
             univ_tag = mapping[tag]
         except KeyError:
@@ -37,12 +37,14 @@ def map_tags(french_tags):
         univ_tags.append((word, univ_tag))
     return univ_tags
 
-sys.stderr.write("Tagging with Stanford Tagger...\n")
 tagger = POSTagger(PATH_TO_MODEL, PATH_TO_JAR)
-for sentence in input_file.readlines():
+lines = input_file.readlines()
+for (count, sentence) in enumerate(lines):
+    percent_complete = round(count / float(len(lines)) * 100)
+    sys.stderr.write("Tagging with Stanford Tagger... %d%%\r" % percent_complete)
     sentence = sentence.strip().decode("latin-1").encode("utf-8")
-    french_tags = tagger.tag(sentence.split())[0] # de-nest the lists
-    univ_tags = map_tags(french_tags)
+    language_specific_tags = tagger.tag(sentence.split())[0] # de-nest the lists
+    univ_tags = map_tags(language_specific_tags)
     tagged_sentence = ""
     for (word, tag) in univ_tags:
         tagged_sentence += word + ":::" + tag + " "

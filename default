@@ -9,7 +9,7 @@ import random
 import sys
 
 optparser = optparse.OptionParser()
-optparser.add_option("-i", "--input-data", dest="input_data", default="data/test_short.f", help="Input file to tag")
+optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans_short.g", help="Input file to tag")
 (opts, _) = optparser.parse_args()
 
 input_file = open(opts.input_data)

@@ -18,14 +18,14 @@ input_file = open(opts.input_data)
 english_refs_file = open(opts.english_refs)
 alignment_file = open(opts.alignments)
 
-sys.stderr.write("Reading French input...\n")
-all_french_sentences = []
+sys.stderr.write("Reading German input...\n")
+all_german_sentences = []
 for sentence in input_file.readlines():
     words = []
     sentence = sentence.strip()
     for word in sentence.split(" "):
         words.append(word)
-    all_french_sentences.append(words)
+    all_german_sentences.append(words)
 
 sys.stderr.write("Reading tagged English input...\n")
 all_english_tags = []
@@ -43,28 +43,28 @@ for sentence_alignment in alignment_file.readlines():
     alignment_pairs = []
     sentence_alignment = sentence_alignment.strip()
     for word_alignment in sentence_alignment.split(" "):
-        (french_index, english_index) = word_alignment.split("-")
-        alignment_pairs.append((int(french_index), int(english_index)))
+        (german_index, english_index) = word_alignment.split("-")
+        alignment_pairs.append((int(german_index), int(english_index)))
     all_alignments.append(alignment_pairs)
 
 sys.stderr.write("Tagging...\n")
-french_tags = []
+german_tags = []
 for i in xrange(len(all_alignments)):
     sentence_alignment = all_alignments[i]
-    french_sentence = all_french_sentences[i]
+    german_sentence = all_german_sentences[i]
     tagged_english_sentence = all_english_tags[i]
-    tagged_french_sentence = []
-    for j in xrange(len(french_sentence)):
-        word = french_sentence[j]
+    tagged_german_sentence = []
+    for j in xrange(len(german_sentence)):
+        word = german_sentence[j]
         tag = "X"
         for word_alignment in sentence_alignment:
             if word_alignment[0] == j:
                 tag = tagged_english_sentence[word_alignment[1]][1]
                 break
-        tagged_french_sentence.append((word, tag))
-    french_tags.append(tagged_french_sentence)
+        tagged_german_sentence.append((word, tag))
+    german_tags.append(tagged_german_sentence)
 
-for sentence in french_tags:
+for sentence in german_tags:
     tagged_sentence = ""
     for (word, tag) in sentence:
         tagged_sentence += word + ":::" + tag + " "
