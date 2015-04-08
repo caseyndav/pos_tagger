@@ -11,11 +11,12 @@ import sys
 from nltk.tag.stanford import POSTagger
 
 PATH_TO_MODEL = "../stanford_postagger/models/english-left3words-distsim.tagger"
+#PATH_TO_MODEL = "../stanford_postagger/models/german-fast.tagger"
 PATH_TO_JAR = "../stanford_postagger/stanford-postagger.jar"
 
 optparser = optparse.OptionParser()
-optparser.add_option("-i", "--input-data", dest="input_data", default="data/test.f", help="Test data file to generate refs for")
-optparser.add_option("-m", "--mapping", dest="map_file", default="data/fr-paris.map", help="Line-by-line fr-univ tag mappings")
+optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.e", help="Test data file to generate refs for")
+optparser.add_option("-m", "--mapping", dest="map_file", default="data/en-ptb.map", help="Line-by-line german-univ tag mappings")
 (opts, _) = optparser.parse_args()
 
 input_file = open(opts.input_data)
@@ -39,7 +40,7 @@ def map_tags(french_tags):
 sys.stderr.write("Tagging with Stanford Tagger...\n")
 tagger = POSTagger(PATH_TO_MODEL, PATH_TO_JAR)
 for sentence in input_file.readlines():
-    sentence = sentence.strip()
+    sentence = sentence.strip().decode("latin-1").encode("utf-8")
     french_tags = tagger.tag(sentence.split())[0] # de-nest the lists
     univ_tags = map_tags(french_tags)
     tagged_sentence = ""

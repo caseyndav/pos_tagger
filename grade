@@ -9,7 +9,7 @@ import optparse
 import sys
 
 optparser = optparse.OptionParser()
-optparser.add_option("-r", "--reference", dest="ref_file", default="data/refs_short.f", help="Reference POS tags")
+optparser.add_option("-r", "--reference", dest="ref_file", default="data/refs_short.g", help="Reference POS tags")
 (opts, _) = optparser.parse_args()
 
 ref_file = open(opts.ref_file)
