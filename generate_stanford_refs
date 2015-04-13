@@ -10,13 +10,13 @@ import optparse
 import sys
 from nltk.tag.stanford import POSTagger
 
-PATH_TO_MODEL = "../stanford_postagger/models/english-left3words-distsim.tagger"
-#PATH_TO_MODEL = "../stanford_postagger/models/german-fast.tagger"
+#PATH_TO_MODEL = "../stanford_postagger/models/english-left3words-distsim.tagger"
+PATH_TO_MODEL = "../stanford_postagger/models/german-fast.tagger"
 PATH_TO_JAR = "../stanford_postagger/stanford-postagger.jar"
 
 optparser = optparse.OptionParser()
-optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.e", help="Test data file to generate refs for")
-optparser.add_option("-m", "--mapping", dest="map_file", default="data/en-ptb.map", help="Language-specific to universal tag mappings")
+optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.g", help="Test data file to generate refs for")
+optparser.add_option("-m", "--mapping", dest="map_file", default="data/de-negra.map", help="Language-specific to universal tag mappings")
 (opts, _) = optparser.parse_args()
 
 input_file = open(opts.input_data)
