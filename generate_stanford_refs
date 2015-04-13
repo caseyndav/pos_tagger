@@ -52,4 +52,4 @@ for (count, sentence) in enumerate(lines):
     sys.stdout.write(tagged_sentence.encode("utf-8"))
 
 input_file.close()
-sys.stderr.write("Done\n")
+sys.stderr.write("\nDone\n")

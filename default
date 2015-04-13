@@ -14,7 +14,7 @@ optparser.add_option("-i", "--input-data", dest="input_data", default="data/comt
 
 input_file = open(opts.input_data)
 tags = ("ADJ", "ADP", "ADV", "AUX", "CONJ", "DET", "INTJ", "NOUN", "NUM",
-        "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X")
+        "PRT", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X")
 
 sys.stderr.write("Tagging...\n")
 for sentence in input_file.readlines():
