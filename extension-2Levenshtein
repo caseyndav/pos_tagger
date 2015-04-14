@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+
+# File:         extension-2
+# Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
+# Description:  An extension that examines identical words to remove common alignment-based errors
+
+import optparse
+import sys
+from Levenshtein import distance
+
+optparser = optparse.OptionParser()
+optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.g", help="Input file to tag")
+optparser.add_option("-e", "--english-refs", dest="english_refs", default="data/refs_short.e", help="POS-tagged English refs")
+optparser.add_option("-a", "--alignments", dest="alignments", default="data/comtrans_short.a", help="German-English alignment file")
+optparser.add_option("-l", "--levenshtein_param", dest="levenshtein_param", default=1, type = float, help="Levenshtein param")
+(opts, _) = optparser.parse_args()
+
+input_file = open(opts.input_data)
+english_refs_file = open(opts.english_refs)
+alignment_file = open(opts.alignments)
+
+sys.stderr.write("Reading German input...\n")
+all_german_sentences = []
+for sentence in input_file.readlines():
+    words = []
+    sentence = sentence.strip()
+    for word in sentence.split(" "):
+        words.append(word)
+    all_german_sentences.append(words)
+
+sys.stderr.write("Reading tagged English input...\n")
+all_english_tags = []
+for sentence in english_refs_file.readlines():
+    word_tag_pairs = []
+    sentence = sentence.strip()
+    for tagged_word in sentence.split(" "):
+        (word, tag) = tagged_word.split(":::")
+        word_tag_pairs.append((word, tag))
+    all_english_tags.append(word_tag_pairs)
+
+sys.stderr.write("Reading alignment file...\n")
+all_alignments = []
+for sentence_alignment in alignment_file.readlines():
+    alignment_pairs = []
+    sentence_alignment = sentence_alignment.strip()
+    for word_alignment in sentence_alignment.split(" "):
+        (german_index, english_index) = word_alignment.split("-")
+        alignment_pairs.append((int(german_index), int(english_index)))
+    all_alignments.append(alignment_pairs)
+
+sys.stderr.write("Tagging...\n")
+german_tags = []
+#The list of English and German words with the same spelling and a different meaning came from the website:
+#http://leicht-deutsch-lernen.com/same-word-different-meaning
+#Accessed 4/13/2015
+English_and_German_words_with_the_same_spelling_and_different_meaning =['angel', 'art', 'bad', 'bald', 'boot', 'brief', 'dank', 'fast', 'gift', 'glut', 'grab', 'gut', 'hall', 'handy', 'hat', 'hut', 'kind', 'lack', 'hell', 'last', 'lied', 'links', 'list', 'made', 'mark', 'mist', 'most', 'mutter', 'not', 'qualm', 'rat', 'rind', 'rock', 'sage', 'see', 'sold', 'stern', 'stock', 'Angel', 'Art', 'Bad', 'Bald', 'Boot', 'Brief', 'Dank', 'Fast', 'Gift', 'Glut', 'Grab', 'Gut', 'Hall', 'Handy', 'Hat', 'Hut', 'Kind', 'Lack', 'Hell', 'Last', 'Lied', 'Links', 'List', 'Made', 'Mark', 'Mist', 'Most', 'Mutter', 'Not', 'Qualm', 'Rat', 'Rind', 'Rock', 'Sage', 'See', 'Sold', 'Stern', 'Stock']
+##To speed up the act of writing the list, I first wrote a lowercase only version and then ran it through the for loop below
+##Capitalization is important because the words might be found at the start or in the body of a sentence
+##The German language has different rules that necessitate the constant capitalization of some of these words and thus some
+##of the lowercase words in this list, namely the ones that are German nouns, could not actually be accidentally matched
+##because they would never appear in the first place. This could not possibly cause a problem.
+##English_and_German_words_with_the_same_spelling_and_different_meaning =["angel","art", "bad", "bald", "boot", "brief", "dank", "fast", "gift", "glut", "grab", "gut", "hall", "handy", "hat",  "hut", "kind", "lack", "hell", "last", "lied", "links", "list", "made", "mark", "mist", "most", "mutter", "not", "qualm", "rat", "rind", "rock", "sage", "see", "sold", "stern", "stock"]
+##copy =["angel","art", "bad", "bald", "boot", "brief", "dank", "fast", "gift", "glut", "grab", "gut", "hall", "handy", "hat",  "hut", "kind", "lack", "hell", "last", "lied", "links", "list", "made", "mark", "mist", "most", "mutter", "not", "qualm", "rat", "rind", "rock", "sage", "see", "sold", "stern", "stock"]
+##for word in copy:
+##    English_and_German_words_with_the_same_spelling_and_different_meaning.append(word[0].capitalize() + word[1:])
+##print English_and_German_words_with_the_same_spelling_and_different_meaning
+for i in xrange(len(all_alignments)):
+    sentence_alignment = all_alignments[i]
+    german_sentence = all_german_sentences[i]
+    tagged_english_sentence = all_english_tags[i]
+    tagged_german_sentence = []
+    for j in xrange(len(german_sentence)):
+        word = german_sentence[j]
+        tag = "X"
+        for word_alignment in sentence_alignment:
+            #Word comparison is based on similarity
+            similaritylevel = distance(word, tagged_english_sentence[word_alignment[1]][0])
+            Godunov = False
+            if similaritylevel <= opts.levenshtein_param:
+                Godunov = True
+            if Godunov:
+                if not(word in English_and_German_words_with_the_same_spelling_and_different_meaning):
+                    tag = tagged_english_sentence[word_alignment[1]][1]
+            elif word_alignment[0] == j:
+                tag = tagged_english_sentence[word_alignment[1]][1]
+                break
+        tagged_german_sentence.append((word, tag))
+    german_tags.append(tagged_german_sentence)
+
+for sentence in german_tags:
+    tagged_sentence = ""
+    for (word, tag) in sentence:
+        tagged_sentence += word + ":::" + tag + " "
+    sys.stdout.write(tagged_sentence + "\n")
+
+input_file.close()
+english_refs_file.close()
+alignment_file.close()
+sys.stderr.write("Done\n")
