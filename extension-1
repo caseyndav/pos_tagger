@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#The above line allows the usage of German characters
+
+# File:         extension-1
+# Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
+# Description:  An extension that considers German capitalization rules to remove common alignment-based errors
+
+import optparse
+import sys
+
+optparser = optparse.OptionParser()
+optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.g", help="Input file to tag")
+optparser.add_option("-e", "--english-refs", dest="english_refs", default="data/refs_short.e", help="POS-tagged English refs")
+optparser.add_option("-a", "--alignments", dest="alignments", default="data/comtrans_short.a", help="German-English alignment file")
+(opts, _) = optparser.parse_args()
+
+input_file = open(opts.input_data)
+english_refs_file = open(opts.english_refs)
+alignment_file = open(opts.alignments)
+
+sys.stderr.write("Reading German input...\n")
+all_german_sentences = []
+for sentence in input_file.readlines():
+    words = []
+    sentence = sentence.strip()
+    for word in sentence.split(" "):
+        words.append(word)
+    all_german_sentences.append(words)
+
+sys.stderr.write("Reading tagged English input...\n")
+all_english_tags = []
+for sentence in english_refs_file.readlines():
+    word_tag_pairs = []
+    sentence = sentence.strip()
+    for tagged_word in sentence.split(" "):
+        (word, tag) = tagged_word.split(":::")
+        word_tag_pairs.append((word, tag))
+    all_english_tags.append(word_tag_pairs)
+
+sys.stderr.write("Reading alignment file...\n")
+all_alignments = []
+for sentence_alignment in alignment_file.readlines():
+    alignment_pairs = []
+    sentence_alignment = sentence_alignment.strip()
+    for word_alignment in sentence_alignment.split(" "):
+        (german_index, english_index) = word_alignment.split("-")
+        alignment_pairs.append((int(german_index), int(english_index)))
+    all_alignments.append(alignment_pairs)
+
+sys.stderr.write("Tagging...\n")
+german_tags = []
+for i in xrange(len(all_alignments)):
+    sentence_alignment = all_alignments[i]
+    german_sentence = all_german_sentences[i]
+    tagged_english_sentence = all_english_tags[i]
+    tagged_german_sentence = []
+    for j in xrange(len(german_sentence)):
+        word = german_sentence[j]
+        tag = "X"
+        #The variable j establishes that we are looking at the first word in the sentence.
+        #In that scenario, we don't want to automatically tag the word as a noun or pronoun.
+        #Nouns and special pronouns at the start of the sentence get no special treatment. This does not matter.
+        for word_alignment in sentence_alignment:
+            #Check for capitalization:
+            CapitalEnglishLetter = (word[0]=='A' or word[0]=='B' or word[0]=='C' or word[0]=='D' or word[0]=='E' or word[0]=='F' or word[0]=='G' or word[0]=='H' or word[0]=='I' or word[0]=='J' or word[0]=='K' or word[0]=='L' or word[0]=='M' or word[0]=='N' or word[0]=='O' or word[0]=='P' or word[0]=='Q' or word[0]=='R' or word[0]=='S' or word[0]=='T' or word[0]=='U' or word[0]=='V' or word[0]=='W' or word[0]=='X' or word[0]=='Y' or word[0]=='Z')
+            #These letters look normal but they are actually the German letter-diacritic combinations and are not considered equivalent by ==.
+            CapitalGermanLetter = (word[0]=='Ä' or word[0]=='Ö' or word[0]=='Ü' or word[0]=='ß')
+            if not(j==0) and (CapitalEnglishLetter or CapitalGermanLetter):
+                #Nouns in German are always capitalized.
+                if not(word == "Sie" or word == "Ihnen" or word == "Ihr"):
+                    tag = "NOUN"
+                #Certain pronouns are also always capitalized.
+                else:
+                    tag = "PRON"
+            elif word_alignment[0] == j:
+                tag = tagged_english_sentence[word_alignment[1]][1]
+                break
+        tagged_german_sentence.append((word, tag))
+    german_tags.append(tagged_german_sentence)
+
+for sentence in german_tags:
+    tagged_sentence = ""
+    for (word, tag) in sentence:
+        tagged_sentence += word + ":::" + tag + " "
+    sys.stdout.write(tagged_sentence + "\n")
+
+input_file.close()
+english_refs_file.close()
+alignment_file.close()
+sys.stderr.write("Done\n")
