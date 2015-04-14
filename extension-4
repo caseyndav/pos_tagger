@@ -1,22 +1,30 @@
 #!/usr/bin/env python
 
-# File:         baseline
+# File:         extension-4
 # Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
-# Description:  Baseline POS tagger that directly projects POS tags from
-#               English to German.
+# Description:  Extension to our baseline tagger which refines the tag outputs
+#               by first calculating the probability that each unique word will
+#               have a given tag, then reassigns "X" tags if the probability of
+#               the new tag is above a certain threshold.
 
+import operator
 import optparse
 import sys
+from collections import defaultdict
 
 optparser = optparse.OptionParser()
 optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans_short.g", help="Input file to tag")
 optparser.add_option("-e", "--english-refs", dest="english_refs", default="data/refs_short.e", help="POS-tagged English refs")
 optparser.add_option("-a", "--alignments", dest="alignments", default="data/comtrans_short.a", help="German-English alignment file")
+optparser.add_option("-t", "--threshold", dest="threshold", default="0.0", type=float, help="Threshold for reassigning most probable tag")
 (opts, _) = optparser.parse_args()
 
 input_file = open(opts.input_data)
 english_refs_file = open(opts.english_refs)
 alignment_file = open(opts.alignments)
+threshold = opts.threshold
+
+tag_probabilities = defaultdict(lambda: defaultdict(float))
 
 sys.stderr.write("Reading German input...\n")
 all_german_sentences = []
@@ -59,15 +67,29 @@ for i in xrange(len(all_alignments)):
         tag = "X"
         for word_alignment in sentence_alignment:
             if word_alignment[0] == j:
-                sys.stderr.write("(" + tagged_english_sentence[word_alignment[1]][0] + "," + word + ")")
+                #sys.stderr.write("(" + tagged_english_sentence[word_alignment[1]][0] + "," + word + ")")
                 tag = tagged_english_sentence[word_alignment[1]][1]
                 break
+        tag_probabilities[word][tag] += 1
         tagged_german_sentence.append((word, tag))
     german_tags.append(tagged_german_sentence)
+
+# Normalize word-tag counts
+for (word, possible_tags_for_word) in tag_probabilities.iteritems():
+    total = float(sum(possible_tags_for_word.values()))
+    for (tag, count) in possible_tags_for_word.iteritems():
+        possible_tags_for_word[tag] = count / total
 
 for sentence in german_tags:
     tagged_sentence = ""
     for (word, tag) in sentence:
+        if tag == "X":
+            try:
+                (new_tag, prob) = max(tag_probabilities[word].iteritems(), key=operator.itemgetter(1)) # Find most probably tag
+                if prob > threshold: # If the new tag is really likely, reassign
+                    tag = new_tag
+            except KeyError:
+                pass
         tagged_sentence += word + ":::" + tag + " "
     sys.stdout.write(tagged_sentence + "\n")
 
