@@ -2,19 +2,15 @@
 
 # File:         extension-2
 # Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
-# Description:  An extension that examines word similarity to remove common alignment-based errors.
+# Description:  An extension that examines identical words to remove common alignment-based errors.
 
 import optparse
 import sys
-from Levenshtein import distance
 
 optparser = optparse.OptionParser()
 optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.g", help="Input file to tag")
 optparser.add_option("-e", "--english-refs", dest="english_refs", default="data/refs_short.e", help="POS-tagged English refs")
 optparser.add_option("-a", "--alignments", dest="alignments", default="data/comtrans_short.a", help="German-English alignment file")
-optparser.add_option("-l", "--levenshtein_param", dest="levenshtein_param", default=1, type = float, help="Levenshtein parameter of acceptable similarity")
-#The Levenshtein similarity parameter was set after manually testing values to find a good result, and is likely the best possible value.
-#Considering the size of our data set, it is likely to be a universally appropriate value.
 (opts, _) = optparser.parse_args()
 
 input_file = open(opts.input_data)
@@ -76,14 +72,7 @@ for i in xrange(len(all_alignments)):
         word = german_sentence[j]
         tag = "X"
         for word_alignment in sentence_alignment:
-            #Sufficiently similar words are likely to be the same parts of speech.
-            #The similarity determining function comes from a module called Levenshtein.
-            similaritylevel = distance(word, tagged_english_sentence[word_alignment[1]][0])
-            Godunov = False
-            if similaritylevel <= opts.levenshtein_param:
-                Godunov = True
-            #The Godunov boolean is a barometer for word similarity based on the command line parameter levenshtein_param.
-            if Godunov:
+            if word == tagged_english_sentence[word_alignment[1]][0]:
                 if not(word in English_and_German_words_with_the_same_spelling_and_different_meaning):
                     tag = tagged_english_sentence[word_alignment[1]][1]
             elif word_alignment[0] == j:
