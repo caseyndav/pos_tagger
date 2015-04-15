@@ -1,0 +1,11 @@
+=====================
+Scores:
+=====================
+
+default          5.91
+baseline        58.87
+extension-1     63.47
+extension-2     59.98
+extension-3     60.51
+extension-4     65.98
+1, 2, 4         70.42
