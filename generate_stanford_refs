@@ -42,7 +42,8 @@ lines = input_file.readlines()
 for (count, sentence) in enumerate(lines):
     percent_complete = round(count / float(len(lines)) * 100)
     sys.stderr.write("Tagging with Stanford Tagger... %d%%\r" % percent_complete)
-    sentence = sentence.strip().decode("latin-1").encode("utf-8")
+    sentence = sentence.strip() #.decode("latin-1").encode("utf-8")
+    #sentence = unicode(sentence, errors="ignore")
     language_specific_tags = tagger.tag(sentence.split())[0] # de-nest the lists
     univ_tags = map_tags(language_specific_tags)
     tagged_sentence = ""
