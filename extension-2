@@ -2,17 +2,18 @@
 
 # File:         extension-2
 # Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
-# Description:  An extension that examines word similarity to remove common alignment-based errors.
+# Description:  An extension that examines word similarity to remove common
+#               alignment-based errors.
 
 import optparse
 import sys
 from Levenshtein import distance
 
 optparser = optparse.OptionParser()
-optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.g", help="Input file to tag")
-optparser.add_option("-e", "--english-refs", dest="english_refs", default="data/refs.e", help="POS-tagged English refs")
-optparser.add_option("-a", "--alignments", dest="alignments", default="data/comtrans.a", help="German-English alignment file")
-optparser.add_option("-l", "--levenshtein_param", dest="levenshtein_param", default=1, type = float, help="Levenshtein parameter of acceptable similarity")
+optparser.add_option("-i", "--input-data", dest="input_data", default="data-dev/comtrans-dev.g", help="Input file to tag")
+optparser.add_option("-e", "--english-refs", dest="english_refs", default="data-dev/refs-dev.e", help="POS-tagged English refs")
+optparser.add_option("-a", "--alignments", dest="alignments", default="data-dev/comtrans-dev.a", help="German-English alignment file")
+optparser.add_option("-l", "--levenshtein_param", dest="levenshtein_param", default=1.0, type = float, help="Levenshtein parameter of acceptable similarity")
 #The Levenshtein similarity parameter was set after manually testing values to find a good result, and is likely the best possible value.
 #Considering the size of our data set, it is likely to be a universally appropriate value.
 (opts, _) = optparser.parse_args()

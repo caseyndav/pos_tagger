@@ -1,74 +1,21 @@
 #!/usr/bin/env python
 
-# File:         baseline
-# Authors:      Casey Davis, Harry Okun, Brian Sladek, Ayla Taylor
-# Description:  Baseline POS tagger that directly projects POS tags from
-#               English to German.
-
 import optparse
 import sys
 
 optparser = optparse.OptionParser()
-optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.g", help="Input file to tag")
-optparser.add_option("-e", "--english-refs", dest="english_refs", default="data/refs.e", help="POS-tagged English refs")
-optparser.add_option("-a", "--alignments", dest="alignments", default="data/comtrans.a", help="German-English alignment file")
+optparser.add_option("-i", "--input-data", dest="input_data", default="data-dev/comtrans-dev.g", help="Input file to tag")
+optparser.add_option("-e", "--english-refs", dest="english_refs", default="data-dev/refs-dev.e", help="POS-tagged English refs")
+optparser.add_option("-a", "--alignments", dest="alignments", default="data-dev/comtrans-dev.a", help="German-English alignment file")
 (opts, _) = optparser.parse_args()
 
 input_file = open(opts.input_data)
 english_refs_file = open(opts.english_refs)
 alignment_file = open(opts.alignments)
 
-sys.stderr.write("Reading German input...\n")
-all_german_sentences = []
-for sentence in input_file.readlines():
-    words = []
-    sentence = sentence.strip()
-    for word in sentence.split(" "):
-        words.append(word)
-    all_german_sentences.append(words)
 
-sys.stderr.write("Reading tagged English input...\n")
-all_english_tags = []
-for sentence in english_refs_file.readlines():
-    word_tag_pairs = []
-    sentence = sentence.strip()
-    for tagged_word in sentence.split(" "):
-        (word, tag) = tagged_word.split(":::")
-        word_tag_pairs.append((word, tag))
-    all_english_tags.append(word_tag_pairs)
+## YOUR CODE HERE ##
 
-sys.stderr.write("Reading alignment file...\n")
-all_alignments = []
-for sentence_alignment in alignment_file.readlines():
-    alignment_pairs = []
-    sentence_alignment = sentence_alignment.strip()
-    for word_alignment in sentence_alignment.split(" "):
-        (german_index, english_index) = word_alignment.split("-")
-        alignment_pairs.append((int(german_index), int(english_index)))
-    all_alignments.append(alignment_pairs)
-
-sys.stderr.write("Tagging...\n")
-german_tags = []
-for i in xrange(len(all_alignments)):
-    sentence_alignment = all_alignments[i]
-    german_sentence = all_german_sentences[i]
-    tagged_english_sentence = all_english_tags[i]
-    tagged_german_sentence = []
-    for j in xrange(len(german_sentence)):
-        word = german_sentence[j]
-        tag = "X"
-        for word_alignment in sentence_alignment:
-            if word_alignment[0] == j:
-                tag = tagged_english_sentence[word_alignment[1]][1]
-                break
-        tagged_german_sentence.append((word, tag))
-    german_tags.append(tagged_german_sentence)
-
-for sentence in german_tags:
-    tagged_sentence = ""
-    for (word, tag) in sentence:
-        tagged_sentence += word + ":::" + tag + " "
-    sys.stdout.write(tagged_sentence + "\n")
 
 input_file.close()
 english_refs_file.close()

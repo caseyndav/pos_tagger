@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+# File:         split_comtrans_corpus
+# Author:       Casey Davis
+# Description:  Splits the ComTrans word-aligned German-English corpus from the
+#               nltk package into its constituent components (German sentences,
+#               English sentences, alignments).
+
+import sys
+
+comtrans_file = open("data/alignment-de-en.txt")
+german_file = open("data/comtrans.g", "w")
+english_file = open("data/comtrans.e", "w")
+alignment_file = open("data/comtrans.a", "w")
+
+lines = comtrans_file.readlines()
+
+for i in xrange(0, len(lines), 3):
+    german_file.write(lines[i])
+    english_file.write(lines[i+1])
+    alignment_file.write(lines[i+2])
