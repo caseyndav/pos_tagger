@@ -10,8 +10,8 @@ from Levenshtein import distance
 
 optparser = optparse.OptionParser()
 optparser.add_option("-i", "--input-data", dest="input_data", default="data/comtrans.g", help="Input file to tag")
-optparser.add_option("-e", "--english-refs", dest="english_refs", default="data/refs_short.e", help="POS-tagged English refs")
-optparser.add_option("-a", "--alignments", dest="alignments", default="data/comtrans_short.a", help="German-English alignment file")
+optparser.add_option("-e", "--english-refs", dest="english_refs", default="data/refs.e", help="POS-tagged English refs")
+optparser.add_option("-a", "--alignments", dest="alignments", default="data/comtrans.a", help="German-English alignment file")
 optparser.add_option("-l", "--levenshtein_param", dest="levenshtein_param", default=1, type = float, help="Levenshtein param")
 (opts, _) = optparser.parse_args()
 
